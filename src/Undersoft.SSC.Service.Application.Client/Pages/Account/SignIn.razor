@@ -1,0 +1,44 @@
+﻿@page "/account/signin"
+@inject IAccessService _service
+@inject NavigationManager _navigation
+
+@using Account = Undersoft.SSC.Service.Contracts.Account;
+@using Undersoft.SDK.Invoking;
+@using Undersoft.SDK.Service.Data.Client;
+@using Undersoft.SSC.Service.Application;
+@using Undersoft.SDK.Service.Application.Access;
+
+<h3>Sign in</h3>
+
+<EditForm Model="account" OnValidSubmit="Access">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Email:</label>
+        <div>
+            <InputText class="form-control" @bind-Value="@account.Credentials.Email" />
+            <ValidationMessage For="@(() => account.Credentials.Email)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Password:</label>
+        <div>
+            <InputText type="password" class="form-control" @bind-Value="@account.Credentials.Password" />
+            <ValidationMessage For="@(() => account.Credentials.Password)" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Sign in</button>
+</EditForm>
+
+@code {
+    private Account account = new Account();
+
+    private async Task Access()
+    {
+        await _service.SignIn(account);
+
+        _navigation.NavigateTo("");
+    }
+}
