@@ -1,0 +1,99 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Undersoft.SDK.Instant.Proxies
+@using Undersoft.SDK.Instant.Rubrics
+@using Undersoft.SDK
+
+@inject NavigationManager _navigation
+
+@typeparam TModel where TModel : class, IOrigin, IInnerProxy
+
+@implements IDialogContentComponent<IGenericData<TModel>>
+
+<!-- Header -->
+<FluentDialogHeader>
+    <FluentStack Orientation="Orientation.Vertical">        
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <a><img src=@Content.Logo /></a>
+            <FluentSpacer/>
+            <FluentIcon Value="@Content.Icon" />
+            <FluentLabel Typo="Typography.PaneHeader">
+                @Dialog.Instance.Parameters.Title
+            </FluentLabel>
+        </FluentStack>
+        <FluentLabel Typo="Typography.Body">
+            @Content.Description
+        </FluentLabel>
+        <FluentLabel Typo="Typography.Body" Color="Color.Error">
+            @Content.Status
+        </FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
+
+@if (Content != null)
+{
+    <!-- Body -->
+    <FluentDialogBody>
+
+        <!-- Auto Form -->
+        <GenericForm TModel="@TModel" Model="@Content" Context="@FormContext" />
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <a>Forgot credentials?</a>
+            <FluentButton OnClick="@OnPasswordReset" Appearance="Appearance.Lightweight">
+                Reset password
+            </FluentButton>
+        </FluentStack>
+    </FluentDialogBody>
+}
+<!-- Footer -->
+<FluentDialogFooter>
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+        <a>Don't have an account?</a>
+        <FluentButton OnClick="@OnSignUp" Appearance="Appearance.Lightweight">
+            Sign up
+        </FluentButton>
+    </FluentStack>
+    <FluentSpacer />
+    <FluentButton Appearance="Appearance.Accent"
+                  Disabled="@(!FormContext.Validate())"
+                  OnClick="@SaveAsync">
+        Sign in
+    </FluentButton>
+</FluentDialogFooter>
+
+@code
+{
+    public EditContext FormContext { get; set; } = default!;
+
+    [Parameter]
+    public IGenericData<TModel> Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        FormContext = new EditContext(Content);
+    }
+
+    private async Task OnSignUp(MouseEventArgs e)
+    {
+        Content.NextPath = "access/sign_up";
+
+        await Dialog.CloseAsync(Content);
+    }
+
+    private async Task OnPasswordReset(MouseEventArgs e)
+    {
+        Content.NextPath = "access/sign_up";
+
+        await Dialog.CloseAsync(Content);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (FormContext.Validate())
+        {
+            await Dialog.CloseAsync(Content);
+        }
+    }
+}
